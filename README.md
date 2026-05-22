@@ -66,14 +66,15 @@ Cache lives in `/tmp/<project_name>/clip_NN_J.mp4`. Resumable — re-running pic
 
 ## Documentation
 
+- **[PROCESS.md](PROCESS.md)** — **Full A-to-Z workflow** with music recommendations, color grading strategy, motion handling, SFX layers, audio mixing, iteration loop, and 4K render. Start here.
 - [SKILL.md](SKILL.md) — Detailed skill instructions (the file Claude Code reads)
+- [docs/music-sync.md](docs/music-sync.md) — Music selection + sync to peaks
 - [docs/color-grading.md](docs/color-grading.md) — Per-clip CLIP_GRADE strategy
 - [docs/exposure-recovery.md](docs/exposure-recovery.md) — S-curve + warm shift for underexposed clips
 - [docs/motion-smoothing.md](docs/motion-smoothing.md) — minterpolate fps=60 for anti-saccadé
 - [docs/match-cuts.md](docs/match-cuts.md) — Form match cuts (perpendicular alignment, rotation matching)
-- [docs/music-sync.md](docs/music-sync.md) — Aligning Acts to music peaks
-- [docs/sfx-layers.md](docs/sfx-layers.md) — Synthetic SFX generation patterns
-- [docs/workflow.md](docs/workflow.md) — End-to-end iterative process
+- [docs/sfx-layers.md](docs/sfx-layers.md) — Synthetic SFX recipes + audio mixing balance
+- [docs/workflow.md](docs/workflow.md) — Iteration loop details
 
 ## Reference project
 

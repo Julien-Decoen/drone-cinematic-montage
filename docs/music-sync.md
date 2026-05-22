@@ -1,6 +1,26 @@
-# Music Sync
+# Music Selection & Sync
 
-The music track is the **structural backbone** of the montage. Acts (groups of plans) should boundary on identified music peaks. This document covers identification, alignment, and adjustment workflow.
+The music track is the **structural backbone** of the montage. Acts (groups of plans) should boundary on identified music peaks. This document covers selection, identification, alignment, and adjustment workflow.
+
+## Choosing the right track
+
+Pick the music FIRST — the visual structure follows from it. See [PROCESS.md §1](../PROCESS.md#phase-1--music-selection) for the full style → track recommendation table.
+
+Quick reference:
+- **Mountain / landscape drone** → Cinematic Ambient (Olafur Arnalds, Max Richter, Ludovico Einaudi)
+- **City / aerial reveal** → Cinematic Epic (Hans Zimmer-style, Two Steps From Hell)
+- **Travel / lifestyle** → Chill electronic / Indie folk (Tycho, Bonobo, Bon Iver)
+- **Sunset / golden hour** → Warm ambient (Nils Frahm, Max Cooper)
+- **Action / fast cuts** → Dynamic electronic (ODESZA, Flume)
+
+Sources: Epidemic Sound, Artlist, Musicbed (paid) · Pixabay Music, YouTube Audio Library, Bensound, Uppbeat (free/freemium).
+
+Track requirements:
+- Duration 2-4 min
+- Clear emotional peaks every 30-45s (these become your Act transitions)
+- Calm intro and outro 5-10s (lets the video breathe)
+- Dynamic range (quiet vs loud passages) for varied visual energy
+
 
 ## Identify music peaks
 

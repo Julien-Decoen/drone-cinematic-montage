@@ -51,6 +51,32 @@ sine=f=160,vibrato=f=0.6,lowpass=f=350,volume=0.6
 sine=f=160[rumble] + sine=f=750[whistle starts at t=mid]
 ```
 
+### `cars_far` — distant traffic for high-altitude top-down
+```
+anoisesrc=c=brown:a=0.5,lowpass=f=350,tremolo=f=0.4:d=0.3,volume=0.40
++ sine=f=70,vibrato=f=0.2:d=0.3,volume=0.18
+amix
+```
+Use when drone is >50m above road. Cars look small. Sound is filtered rumble.
+
+### `cars_mid` — audible engines for medium-altitude
+```
+anoisesrc=c=brown:a=0.6,lowpass=f=700,tremolo=f=0.7:d=0.4,volume=0.45
++ sine=f=110,vibrato=f=0.4:d=0.4,volume=0.24
++ sine=f=180,vibrato=f=0.6:d=0.5,volume=0.16
+amix
+```
+Use when drone is 20-50m. Engines start being audible distinctly.
+
+### `cars_close` — defined road noise (optional — sometimes too much)
+```
+anoisesrc=c=pink:a=0.7,bandpass=f=600:w=900,tremolo=f=1.0:d=0.5,volume=0.55
++ sine=f=140,vibrato=f=1.2:d=0.5,volume=0.30
++ sine=f=210,vibrato=f=2.0:d=0.6,volume=0.20
+amix
+```
+Use sparingly — for low-altitude road shots only. Often too aggressive for cinematic mood.
+
 ### `whoosh` — bandpass pink noise burst
 ```
 anoisesrc=c=pink:a=0.55,bandpass=f=900:w=700,afade-in 0.05s,afade-out 0.45s,volume=1.3
@@ -110,19 +136,64 @@ f"[match_idx:a]adelay={mw_delay_ms}|{mw_delay_ms},volume=0.55[matchwh]"
 
 Volume 0.55 = present but not dominant.
 
-## Volume reference table
+## Audio mixing — the balance methodology
 
-For the final mix:
+Without normalization, SFX recipes have wildly different output levels — cascade dominates while ambient is inaudible.
 
-| Layer | Volume (in afilter) | Notes |
+### Step 1 — Normalize per-recipe target volumes
+
+Each SFX recipe's final `amix` output should fall within a target range:
+
+| Recipe | Target sum volume | Reasoning |
 |---|---|---|
-| Music | 0.85 | Primary track |
-| Main SFX (per-clip concat) | 0.28 | Already attenuated in each SFX recipe |
-| Outro SFX | 0.55 | Delayed to outro start |
-| Act stings (boom) | 0.55 | 5 hits per montage |
-| Wind global | 0.65 | (internal volume in make_sfx already 0.18) |
-| Match whoosh | 0.55 | Single hit |
-| Transition SFX (xfade) | 0.70 | Per transition |
+| `cascade_fade` | 0.85–1.0 | Climax — allowed to be slightly louder |
+| `whoosh` | 0.7–0.8 | Quick burst, present without spiking |
+| `boom` | 1.0–1.5 | Single impulse, can be punchy |
+| `ambient` | 0.5–0.6 | Background — boosted from naive 0.16 |
+| `cars_far` / `cars_mid` | 0.5–0.6 | Layered traffic, not dominant |
+| `birds` / `train` / `lapping` / `sail` | 0.5–0.7 | Normalized |
+| `riser` / `outro_ambient` | 0.7–1.0 | Climactic / closing |
+| `wind_global` | 0.30 | Subtle continuous |
+
+If you find your cascade is too loud vs ambient, reduce the cascade `volume=` inside its recipe (not in the final mix — that would affect everything).
+
+### Step 2 — Final mix volumes
+
+In the final `afilter` of your script:
+
+```python
+afilter = (
+    f"[1:a]afade=t=in:st=0:d=2.5,"
+    f"afade=t=out:st={music_fade_out}:d=10.0,"
+    f"volume=0.85[mus];"                          # music = 0.85
+    f"[2:a]volume=0.50[main_sfx_v];"              # all per-clip SFX combined = 0.50
+    f"[3:a]volume=0.55,adelay={main_dur*1000}|{main_dur*1000}[outro_sfx_v];"
+    f"[mus][main_sfx_v][outro_sfx_v]amix=inputs=3...[base]"
+    + sting_chain                                  # stings 0.55
+    + transfx_chain                                # transition SFX 0.70
+    + f";[wind_idx:a]volume=0.65[wind]"            # wind_global 0.65
+    + f";[match_idx:a]adelay=...,volume=0.55[matchwh]"  # match whoosh 0.55
+    + ...
+)
+```
+
+### Step 3 — Validate by ear
+
+Render preview, listen with **good speakers or headphones** (not laptop speakers — they miss bass and exaggerate mids). Iterate:
+- Cascade still too loud? Reduce its recipe volumes
+- Ambient still inaudible? Boost recipe volume OR increase main_sfx mix to 0.60
+- Music drowning out everything? Lower music to 0.75
+
+### Balance debugging cheatsheet
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Cascade SFX too loud vs others | Cascade recipe sums to 5.0+ | Cut each layer's `volume=` by 50% |
+| Plan ambient inaudible | Ambient recipe sums to 0.16 (defaults) | Boost layers to 0.30+0.20 = 0.50 |
+| Whoosh blows the meter | `volume=1.3` in recipe | Drop to 0.75 |
+| Boom doesn't impact | Outro SFX delay misaligned | Verify `adelay=int(main_dur*1000)` |
+| SFX inaudible vs music | Music too loud OR main_sfx too quiet | Music 0.85→0.75 OR main_sfx 0.50→0.65 |
+| Cuts feel "missing" | No match_whoosh on form cuts | Add 0.5s whoosh at cut time, volume=0.55 |
 
 ## Adding a new SFX recipe
 

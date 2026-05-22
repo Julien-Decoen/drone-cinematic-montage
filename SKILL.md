@@ -242,9 +242,15 @@ Don't make 5+ changes at once — user can't isolate what worked.
 
 ## Reference files
 
-- `examples/interlaken_v16.py` — Full reference implementation (V16 of the Interlaken project)
+- **[PROCESS.md](PROCESS.md)** — Full A-to-Z workflow with music recommendations (READ THIS FIRST)
+- `examples/interlaken_v19.py` — Latest reference impl (cars SFX + audio mix balance)
+- `examples/interlaken_v16.py` — Earlier reference (exposure_fix introduced)
 - `templates/edit_template.py` — Bare-bones starter
 - `docs/` — Detailed guides per topic
 - `scripts/analyze_rotation.py` — Measure yaw rotation rate for match cuts
 - `scripts/analyze_sat.py` — Per-clip signalstats analysis
 - `scripts/find_perpendicular.py` — Find perpendicular line frames
+
+## When the user asks "comment je commence"
+
+Point them to **PROCESS.md** — it walks through music selection, EDIT structure, color grading, motion handling, SFX layers, iteration loop, and final 4K render in order. The skill's value is the **process**, not just the script.
