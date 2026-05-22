@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.bak
+
+# Render cache (per-script TMP dirs)
+/tmp/
+
+# Generated outputs (large MP4s)
+*.mp4
+!examples/*.mp4   # if any sample outputs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
