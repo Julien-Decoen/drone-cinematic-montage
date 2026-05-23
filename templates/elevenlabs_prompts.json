@@ -1,0 +1,81 @@
+{
+  "_description": "Battle-tested ElevenLabs Sound Generation prompts for cinematic drone montages. Adjust scene specifics, keep style anchors.",
+  "_style_rules": [
+    "Always end with 'cinematic ambient' or 'cinematic ambient minimal'",
+    "Specify count: 'one or two', 'two or three' — never 'many'",
+    "Specify POV: 'drone view', 'recorded from far distance'",
+    "Add 'no music' to prevent ElevenLabs adding music background",
+    "Add 'at moderate volume not silent' if subtle (else file is too quiet)",
+    "Negative constraints: 'no horn', 'no people', 'no announcements'"
+  ],
+  "prompts": {
+    "cascade": {
+      "prompt": "small alpine swiss waterfall with gentle modest water flow, mountain stream cascading down rocks, peaceful natural flow, not too powerful, mid-distance, cinematic ambient outdoor recording, calm continuous water sound",
+      "duration": 15
+    },
+    "whoosh": {
+      "prompt": "cinematic soft single whoosh, gentle swooshing air movement, slow reveal sweep, smooth, no impact at end",
+      "duration": 4
+    },
+    "boom": {
+      "prompt": "deep cinematic sub bass impact, single low frequency hit, slow decay, no music, dramatic",
+      "duration": 3
+    },
+    "birds_forest": {
+      "prompt": "two or three small alpine birds chirping gently in distant swiss forest, very soft, very minimal, cinematic ambient, no music, recorded outdoors",
+      "duration": 10
+    },
+    "flag_wind": {
+      "prompt": "swiss flag fluttering gently in light alpine breeze, fabric flapping softly, single small flag, cinematic ambient minimal",
+      "duration": 8
+    },
+    "lapping_calm": {
+      "prompt": "gentle calm lake water lapping audibly on pebble shore, foggy peaceful morning, clear water sound at moderate volume, cinematic",
+      "duration": 10
+    },
+    "train_rails": {
+      "prompt": "vintage swiss alpine cog railway train moving very slowly at 5 km/h, very slow rhythmic wheel clack on cogwheel rack rails, tourist scenic mountain train at near walking pace, gentle creaking metal, mid-distance, no horn no whistle, peaceful, cinematic ambient outdoor recording",
+      "duration": 8
+    },
+    "cars_passing_high": {
+      "prompt": "drone view from very high altitude, one or two cars driving on alpine road far below, very distant soft engine rumble passing by then away, peaceful cinematic ambient",
+      "duration": 10
+    },
+    "cars_following_drone": {
+      "prompt": "drone following a single car driving on alpine mountain road, smooth car engine moving away, peaceful background, cinematic ambient",
+      "duration": 12
+    },
+    "ambient_alpine": {
+      "prompt": "alpine mountain ambient with clearly audible mountain wind, gentle but present, peaceful but not silent, cinematic ambient at moderate volume",
+      "duration": 12
+    },
+    "lake_sail_calm": {
+      "prompt": "calm large alpine lake water with audible sailboat fabric and rigging creaking, gentle but clear, moderate volume, cinematic ambient",
+      "duration": 10
+    },
+    "river_gentle": {
+      "prompt": "alpine river flowing past stone buildings, water clearly audible flowing over pebbles, moderate volume, cinematic ambient",
+      "duration": 10
+    },
+    "footsteps_concrete": {
+      "prompt": "single person walking on dry concrete path with clearly audible slow footsteps, swiss village, moderate volume, cinematic ambient",
+      "duration": 6
+    },
+    "riser_orchestral": {
+      "prompt": "slow cinematic orchestral riser, very slow build of strings and low brass, gentle crescendo no big impact, peaceful anticipation, no drums",
+      "duration": 15
+    },
+    "outro_ambient_evening": {
+      "prompt": "peaceful swiss alpine evening with clearly audible gentle wind and distant nature, moderate volume, ending atmosphere, cinematic minimal",
+      "duration": 15
+    },
+    "wind_global_whisper": {
+      "prompt": "extremely subtle mountain wind whisper, almost imperceptible alpine breeze, very quiet background ambient, cinematic, no other sounds",
+      "duration": 20
+    },
+    "drone_propeller_slow": {
+      "prompt": "small quadcopter drone propellers spinning at very slow idle speed, soft rotating blade hum, gentle continuous mechanical sound, peaceful, cinematic ambient",
+      "duration": 12
+    }
+  }
+}

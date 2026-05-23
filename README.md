@@ -66,14 +66,21 @@ Cache lives in `/tmp/<project_name>/clip_NN_J.mp4`. Resumable — re-running pic
 
 ## Documentation
 
-- **[PROCESS.md](PROCESS.md)** — **Full A-to-Z workflow** with music recommendations, color grading strategy, motion handling, SFX layers, audio mixing, iteration loop, and 4K render. Start here.
-- [SKILL.md](SKILL.md) — Detailed skill instructions (the file Claude Code reads)
+- **[PROCESS.md](PROCESS.md)** — **Full A-to-Z workflow**. Start here.
+- **[docs/delivery-checklist.md](docs/delivery-checklist.md)** — **Turn-key 10-phase checklist** for every project
+- [SKILL.md](SKILL.md) — Skill instructions (the file Claude Code reads)
+
+### Detailed guides
 - [docs/music-sync.md](docs/music-sync.md) — Music selection + sync to peaks
 - [docs/color-grading.md](docs/color-grading.md) — Per-clip CLIP_GRADE strategy
 - [docs/exposure-recovery.md](docs/exposure-recovery.md) — S-curve + warm shift for underexposed clips
 - [docs/motion-smoothing.md](docs/motion-smoothing.md) — minterpolate fps=60 for anti-saccadé
 - [docs/match-cuts.md](docs/match-cuts.md) — Form match cuts (perpendicular alignment, rotation matching)
 - [docs/sfx-layers.md](docs/sfx-layers.md) — Synthetic SFX recipes + audio mixing balance
+- [docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md) — **Real SFX via ElevenLabs API**
+- [docs/audio-mixing.md](docs/audio-mixing.md) — **Iterative mixing methodology** (15+ iterations refined)
+- [docs/youtube-delivery.md](docs/youtube-delivery.md) — **YouTube publishing kit** (thumbnail/banner/title/description/tags)
+- [docs/instagram-vertical.md](docs/instagram-vertical.md) — **Instagram 9:16 teaser** (full vertical + Reels 60s + 1:1)
 - [docs/workflow.md](docs/workflow.md) — Iteration loop details
 
 ## Reference project

@@ -243,14 +243,34 @@ Don't make 5+ changes at once — user can't isolate what worked.
 ## Reference files
 
 - **[PROCESS.md](PROCESS.md)** — Full A-to-Z workflow with music recommendations (READ THIS FIRST)
-- `examples/interlaken_v19.py` — Latest reference impl (cars SFX + audio mix balance)
+- **[docs/delivery-checklist.md](docs/delivery-checklist.md)** — Turn-key 10-phase checklist for every new project
+- `examples/interlaken_v19.py` — Reference impl (cars SFX + audio mix balance)
 - `examples/interlaken_v16.py` — Earlier reference (exposure_fix introduced)
 - `templates/edit_template.py` — Bare-bones starter
-- `docs/` — Detailed guides per topic
+- `docs/` — Detailed guides per topic (see below)
 - `scripts/analyze_rotation.py` — Measure yaw rotation rate for match cuts
 - `scripts/analyze_sat.py` — Per-clip signalstats analysis
 - `scripts/find_perpendicular.py` — Find perpendicular line frames
 
+## Detailed guides
+
+| Topic | Doc |
+|---|---|
+| Music selection + sync | `docs/music-sync.md` |
+| Color grading + per-clip overrides | `docs/color-grading.md` |
+| Exposure recovery (S-curve + warm shift) | `docs/exposure-recovery.md` |
+| Motion smoothing (minterpolate) | `docs/motion-smoothing.md` |
+| Form match cuts (perpendicular + rotation) | `docs/match-cuts.md` |
+| **SFX layers (synthetic recipes + balance)** | `docs/sfx-layers.md` |
+| **SFX real via ElevenLabs API** | `docs/sfx-real-elevenlabs.md` |
+| **Audio mixing methodology (iterative)** | `docs/audio-mixing.md` |
+| **YouTube delivery (thumbnail/banner/title/description)** | `docs/youtube-delivery.md` |
+| **Instagram vertical 9:16 teaser** | `docs/instagram-vertical.md` |
+| **Turn-key delivery checklist** | `docs/delivery-checklist.md` |
+| Iteration loop details | `docs/workflow.md` |
+
 ## When the user asks "comment je commence"
 
-Point them to **PROCESS.md** — it walks through music selection, EDIT structure, color grading, motion handling, SFX layers, iteration loop, and final 4K render in order. The skill's value is the **process**, not just the script.
+Point them to **PROCESS.md** + **delivery-checklist.md**. The first describes the methodology; the second is a concrete to-do list to publish a new film.
+
+The skill's value is the **process**, not just the script.
