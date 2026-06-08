@@ -1,0 +1,13 @@
+# Core (required for all renders)
+Pillow>=10.0
+
+# v3 — pro pipeline (per-script)
+librosa>=0.10        # beat_sync.py
+scikit-learn>=1.3    # reference_grade.py
+numpy<2              # MUST be <2 for cv2 + reference_grade compat
+opencv-python<5      # timer overlay, future saliency reframing
+
+# System (install separately)
+# - ffmpeg >= 6.0  with libx264, minterpolate, lut3d, vidstabdetect/transform
+#   macOS:  brew install ffmpeg
+#   Linux:  apt install ffmpeg
