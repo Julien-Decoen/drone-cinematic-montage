@@ -1,256 +1,262 @@
 ---
 name: drone-cinematic-montage
-description: Build a cinematic montage from drone footage with ffmpeg — color grading per-clip, motion smoothing for slowmo, form-match cuts, music sync, SFX layering. Iterative preview-first workflow.
-when_to_use: User has drone footage clips + an audio track and wants a polished cinematic edit (single video output).
+description: Build a cinematic 3-min drone montage from a folder of clips + a music track using ffmpeg + Python. Per-clip color grading, motion smoothing, music sync, SFX layering. Output 4K MP4.
+when_to_use: User has drone footage clips + a music track and wants a polished cinematic edit (single video output, ~2-4 min).
 ---
 
 # Drone Cinematic Montage — Skill
 
-End-to-end workflow for building a cinematic montage from drone clips using ffmpeg + Python. The skill produces a single MP4 (preview 640×360 OR final 4K 3840×2160) with:
-
-- per-clip color grading (LUT blend + curves + saturation + vignette)
-- exposure recovery for underexposed clips (S-curve + warm shift, preserves deep blacks)
-- motion-compensated frame interpolation for smooth slowmo on low-fps sources
-- form-match cuts (perpendicular alignment between adjacent shots)
-- music-synchronized act transitions
-- per-clip + global SFX layering (wind ambient, riser, whoosh, etc.)
+Build a cinematic montage from drone clips + music using ffmpeg + Python. Battle-tested over 25+ versions on a 3-day Interlaken trip (Lac de Thoune + Brienzersee). The skill produces a 3840×2160 H.264 MP4 with per-clip grading, motion smoothing, frame-precise cuts, music sync and SFX layering.
 
 ## When to invoke this skill
 
-Trigger words: "drone montage", "cinematic edit", "drone cinematic", "drone reel", "video montage from clips".
+Trigger phrases: "drone montage", "cinematic edit", "drone cinematic", "drone reel", "video montage from clips", "monter mes rushs drone", "faire un film aérien".
 
 Don't invoke for:
 - Single-clip processing (just use ffmpeg directly)
-- Music videos with full editing — this is drone-focused
-- Heavy VFX work — this is grading + cuts only
+- Music videos with full editing (this is drone-focused)
+- Heavy VFX (this is grading + cuts only)
 
-## Required inputs from user
+---
 
-1. **Drone clips folder** — typically pre-segmented MP4 files (one shot per file or one shot per segment)
-2. **Music track** — MP3 or WAV (becomes the timeline backbone)
-3. **Optional**: a `.cube` LUT for the color base (Orange-Teal or similar)
+## 🚀 Workflow — exactly what to do when user arrives with a new project
 
-## High-level workflow
+The skill works in **6 phases**. Run them in order. Each phase has its own validator script — don't skip them.
 
-Always **preview-first** — never render 4K before the preview is validated. Iterate on color, timing, cuts at 640×360 (renders in ~5 min). 4K render takes 30-90 min depending on minterpolate usage.
+### Phase 1 — Bootstrap (10-15 min)
 
-```
-1. Probe clips (ffprobe)         → get durations + fps
-2. Build EDIT list                → order, src_start, out_dur, speed, sfx, reframe
-3. Configure CLIP_GRADE           → per-clip LUT/sat/gamma overrides
-4. Set ACT_TRANSITIONS to music   → identify peaks in the audio
-5. Render preview                 → QUALITY=preview python3 script.py
-6. Generate storyboard            → 4×N grid of plan thumbnails
-7. Iterate (color / cut / speed)  → loop steps 2-6
-8. Render 4K final                → QUALITY=final python3 script.py
+User gives you: a folder of MP4 clips + a music track. You run:
+
+```bash
+python3 scripts/bootstrap_project.py \
+  --clips /path/to/clips \
+  --music /path/to/music.mp3 \
+  --out ~/my_project \
+  --title "INTERLAKEN" \
+  --subtitle "Switzerland From Above"
 ```
 
-## Architecture — single Python script
+This produces:
+- **Clips audit** — ffprobe table (duration, fps, D-Log detection, luma/sat)
+- **Music peaks** — auto-detected RMS peaks → suggested `ACT_TRANSITIONS`
+- **`my_project.py`** — pre-filled EDIT list (one plan per clip, defaults), CLIP_GRADE empty, paths wired
+- **`build_mix.py`** — audio mix scaffold (optional)
 
-Use the reference `examples/interlaken_v16.py` as starting point. Copy → modify EDIT + CLIP_GRADE + paths. The script has these phases:
+Show the user the audit + peaks. Ask them to confirm or reorder before going further.
+
+### Phase 2 — Validate the EDIT list (1 min)
+
+```bash
+python3 scripts/validate_edit.py ~/my_project/my_project.py
+```
+
+For each plan: checks `src_start + out_dur × speed ≤ source_duration`. If anything fails, **fix the EDIT list before any render** — otherwise you get silent drift (see [PITFALLS §3](docs/PITFALLS.md)).
+
+### Phase 3 — Preview loop (5-8 min per iteration)
+
+```bash
+QUALITY=preview python3 ~/my_project/my_project.py
+```
+
+Generates a 640×360 preview in ~5-8 min. Show to user, ask **specific** questions:
+- ✅ Cuts feel right? Plan #N→N+1 fluid?
+- ✅ Music sync OK at ACT_TRANSITIONS?
+- ✅ Color cohesion across clips?
+
+Apply **one category** of changes per iteration. Categories: A=structure, B=timing, C=color (`CLIP_GRADE`), D=motion, E=match-cuts, F=music-sync, G=SFX, H=overlays.
+
+After each iteration, run:
+```bash
+python3 scripts/audit_timings.py ~/my_project/my_project.py
+```
+to check cumulative cut times vs `ACT_TRANSITIONS`.
+
+### Phase 4 — Audio mix (optional, but recommended)
+
+If using real MP3 SFX (vs lavfi synthetic), build the audio mix as a separate script:
+
+```bash
+python3 ~/my_project/build_mix.py
+```
+
+This produces `_mix.mp3` independently of the video render. **Big advantage**: iterate SFX in 30s instead of 30 min.
+
+### Phase 5 — 4K final render (30-45 min)
+
+⚠ Before launching:
+
+```bash
+python3 scripts/validate_cache.py /tmp/<project_name> --quality final
+```
+
+This is THE critical step — see [PITFALLS §1](docs/PITFALLS.md). The cache silently reuses 640×360 preview clips at 4K if you don't purge.
+
+Then:
+```bash
+QUALITY=final python3 ~/my_project/my_project.py
+```
+
+On M1 MacBook Pro: 30-45 min for ~22 plans with `minterpolate fps=60`. **Use AC power.**
+
+### Phase 6 — Social distribution (10-30 min, optional)
+
+Once master is done, user typically needs:
+- YouTube thumbnails (4 variants)
+- Instagram story / Reel cover (vertical 9:16, 10-15s teaser)
+- Share copy for Facebook / LinkedIn / Twitter / YouTube description
+
+→ See [docs/social-distribution.md](docs/social-distribution.md) (TODO) for templates.
+
+---
+
+## Architecture — single Python script per project
+
+The render script (`my_project.py`) processes the EDIT list end-to-end:
 
 ```
 main()
-├── 1. Generate PNG overlays (title, outro, credits)
-├── 2. process_clip × N        → render each plan to a sub-MP4 (TMP/clip_NN_J.mp4)
-├── 3. render_xfade_pair       → handle xfade transitions
-├── 4. process_outro           → render outro with overlay baked
-├── 5. process_end_credits     → black + credits PNG
-├── 6. Concat main video       → all sub-clips into main_video.mp4
-├── 7. Apply title overlay     → fade-in PNG over clip #2
-├── 8. Concat full             → main + outro + credits
-└── 9. Final encode            → grain + audio mix (music + SFX + stings + outro)
+├── 1. Generate PNG overlays (title, outro)
+├── 2. process_clip × N        → render each plan to TMP/clip_NN_J.mp4
+├── 3. Concat all sub-clips    → main_video.mp4
+└── 4. Final encode + audio    → OUTPUT.mp4
 ```
 
-Cache: each sub-clip is named by index → resumable. If you change `src_start` or `speed` of a plan, **delete its cached `clip_NN_*.mp4` files** before re-running.
+**Cache strategy**: each `clip_NN_J.mp4` is named by EDIT index + sub-segment. Resumable. **But silently breaks if you switch QUALITY without purging** — use `validate_cache.py`.
 
-## EDIT list structure
+---
+
+## EDIT list — V25 tuple structure
 
 ```python
 EDIT = [
     # (fname, src_start, output_dur, speed, sfx, reframe, extra)
-    ("DJI_...0102.MP4",  0.3, 4.0, 0.85,         "ambient", (1.0, 1.05), "hflip"),
-    ("DJI_...0090.MP4",  4.0, 8.0, (0.5, 0.7),   "lapping", None,        None),
-    # ...
+    ("DJI_0102.MP4",  0.3,  4.0, 0.85,         "ambient", (1.0, 1.05), "hflip"),
+    ("DJI_0090.MP4",  4.0,  8.0, (0.5, 0.7),   "lapping", None,        "fadeout"),
+    ("DJI_0091.MP4",  2.0,  3.0, 1.0,          "boom",    None,        "reverse"),
 ]
 ```
 
-- `src_start` (sec) — where in the source clip to start
-- `output_dur` (sec) — duration in the OUTPUT timeline
-- `speed` — float (`0.85` = slowmo) or tuple `(s_start, s_end)` for ease-in-out ramp
-- `sfx` — SFX type name (see `make_sfx`)
-- `reframe` — `(zoom_start, zoom_end)` for Ken Burns push (None = no zoom)
-- `extra` — `"hflip"` to horizontally flip
+Fields:
+- `src_start` — where in source to start (s)
+- `output_dur` — duration in OUTPUT timeline (s)
+- `speed` — float (`0.85` = slowmo) | tuple `(s_start, s_end)` for linear ramp
+- `sfx` — name in `make_sfx()` registry (or `None`)
+- `reframe` — `(zoom_start, zoom_end)` Ken Burns or `None`
+- `extra` — comma-separated modifiers: `"hflip"`, `"reverse"`, `"fadeout"`, or combinations like `"hflip,reverse"`
 
-The actual **source consumed** = `output_dur × speed`. Make sure `src_start + output_dur × speed ≤ source_duration`.
+**Source consumed** = `output_dur × speed`. Validator script checks `src_start + that ≤ duration`.
+
+---
 
 ## CLIP_GRADE — per-clip color overrides
 
-Inside `process_clip`, override the global `LUT_STRENGTH` / `SAT_MULT` baseline per clip:
-
 ```python
 CLIP_GRADE = {
-    "filename_substring": {
-        "lut": 0.45,                # LUT blend strength (0=no LUT, 1=full)
-        "sat": 0.85,                # saturation multiplier
-        "gamma": 1.08,              # gamma lift (for dark clips)
-        "exposure_fix": True,       # apply S-curve + warm shift (see exposure-recovery.md)
-    },
-    ...
+    "0084_D-00.01.21": {"lut": 0.45, "sat": 0.88, "exposure_fix": True},
 }
 ```
 
-Strategy:
-- **Bright over-saturated plans** (greens/teals popping too much): lower `lut` (0.35-0.45) + lower `sat` (0.78-0.88)
+- **Bright over-saturated** (greens pop too much): lower `lut` (0.35-0.45) + lower `sat` (0.78-0.88)
 - **Dark plans** (luma < 85): add `gamma`: 1.08-1.18
-- **Cold cast plans** (overcast, blue-grey): set `exposure_fix: True` to apply curves + warm shift while preserving deep blacks
-- **Match neighbors**: extract frames, measure `signalstats` `SATAVG`, align clips to within ±2 of each other
+- **Cold cast / overcast**: `exposure_fix: True` → S-curve + warm shift (preserves deep blacks)
 
-See `docs/color-grading.md` for the full diagnostic workflow.
+→ Full diagnostic workflow in [docs/color-grading.md](docs/color-grading.md) and [docs/exposure-recovery.md](docs/exposure-recovery.md).
+
+---
 
 ## Motion smoothing — minterpolate
 
-Slowmo from 30fps sources at speed < 0.9 produces effective <27fps output → judder ("saccadé"). The fix is **motion-compensated frame interpolation** applied BEFORE setpts:
+30fps × 0.5× speed = 15fps effective → judder. Fix with motion-compensated interpolation **before** setpts:
 
-```python
-# In process_subseg, when src_fps < 50 and speed < 0.9:
-interp_chain = "minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,"
+```
+minterpolate=fps=60:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,
+setpts=2.0*PTS
 ```
 
-- `fps=60` is enough for 30fps × 0.5x (effective 30fps after interp + setpts)
-- `fps=120` is overkill at 4K (3-4× slower render) and only marginal improvement
-- `mci+aobmc` = motion compensated with adaptive overlapped block (best quality)
+The template applies this automatically when `src_fps < 50 AND speed < 0.9`.
 
-Don't apply on clips where speed ≥ 0.9 (no benefit, costs CPU).
+→ Details in [docs/motion-smoothing.md](docs/motion-smoothing.md).
 
-See `docs/motion-smoothing.md`.
+---
 
-## Exposure recovery — S-curve + warm shift
+## SFX — two options
 
-For underexposed cloudy/overcast clips with cold cast (e.g. shot in evening light at mountain shadow), naive `eq=brightness` lifts blacks to grey. Instead use **shadow-compressed S-curve + colorbalance warm shift**:
+**A. Synthetic (`make_sfx` in template)** — fast, free, no asset folder needed. Sounds synthetic.
 
-```python
-"[bl]curves=master='0/0 0.05/0.02 0.20/0.27 0.50/0.62 0.80/0.88 1/1':all='0/0 1/1',"
-"colorbalance=bs=-0.05:bm=-0.03:bh=-0.02,"
-"eq=saturation=1.10:gamma=1.08:contrast=1.080,"
+**B. Real MP3 (recommended for V20+)** — Pixabay + ElevenLabs `.mp3` files in `_sfx_real/`. Calibrated dB targets in external `build_mix.py`. Better fidelity.
+
+→ For real MP3 pipeline, see [docs/sfx-real-sourcing.md](docs/sfx-real-sourcing.md) (TODO).
+
+---
+
+## ⚠ Critical pitfalls (read these BEFORE the first render)
+
+The skill has 16 documented bugs you WILL hit otherwise. Top 3:
+
+1. **4K render produces 640×360** — cache contamination. Always run `validate_cache.py` before switching QUALITY.
+2. **Cumulative drift** — source insufficient → silent clamping. Always run `validate_edit.py`.
+3. **Music sync drifts after EDIT changes** — every duration tweak shifts following plans. Always run `audit_timings.py`.
+
+→ Full bestiary in [docs/PITFALLS.md](docs/PITFALLS.md).
+
+---
+
+## Iteration discipline
+
+- **Preview-first**. Never render 4K before preview is validated. Preview = 5-8 min, 4K = 30-45 min.
+- **One change category per iteration**. The user can't isolate what worked if 5 things changed.
+- **Cache invalidation**. When you change `src_start`, `speed`, or `CLIP_GRADE` for plan #N:
+  ```bash
+  find /tmp/<project> -name "clip_NN_*.mp4" -delete
+  find /tmp/<project> -name "main_video.mp4" -delete
+  find /tmp/<project> -name "trans_*.mp4" -delete
+  ```
+- **Specific validation questions**, never "ça te plaît ?". Ask "cut #N→N+1 fluide ?", "sync à 1:14 ?".
+
+---
+
+## Reference files in this skill
+
+| Path | Purpose |
+|---|---|
+| **[SKILL.md](SKILL.md)** | This file (entry point) |
+| **[PROCESS.md](PROCESS.md)** | Full A-to-Z walkthrough with music recommendations |
+| **[docs/PITFALLS.md](docs/PITFALLS.md)** | ⚠ All 16 bugs documented (READ THIS) |
+| **[docs/color-grading.md](docs/color-grading.md)** | Per-clip grading diagnostic |
+| **[docs/exposure-recovery.md](docs/exposure-recovery.md)** | S-curve + warm shift recipe |
+| **[docs/motion-smoothing.md](docs/motion-smoothing.md)** | minterpolate cookbook |
+| **[docs/match-cuts.md](docs/match-cuts.md)** | Perpendicular alignment + yaw rotation matching |
+| **[docs/music-sync.md](docs/music-sync.md)** | ACT_TRANSITIONS strategy |
+| **[docs/sfx-layers.md](docs/sfx-layers.md)** | Synthetic SFX recipes + balance |
+| **[scripts/bootstrap_project.py](scripts/bootstrap_project.py)** | 🚀 NEW: project starter in 1 command |
+| **[scripts/validate_edit.py](scripts/validate_edit.py)** | 🛡 NEW: source capacity validator |
+| **[scripts/validate_cache.py](scripts/validate_cache.py)** | 🛡 NEW: cache resolution validator |
+| **[scripts/audit_timings.py](scripts/audit_timings.py)** | 🛡 NEW: cumulative cuts vs music |
+| **[scripts/analyze_rotation.py](scripts/analyze_rotation.py)** | Yaw rotation rate for match cuts |
+| **[scripts/analyze_sat.py](scripts/analyze_sat.py)** | Per-clip signalstats diff |
+| **[templates/render_template.py](templates/render_template.py)** | 📐 V25-grade ready-to-use template |
+| **[examples/interlaken_v19.py](examples/interlaken_v19.py)** | Real working script (archive, V19) |
+
+---
+
+## Quick reference — first-time user
+
+```bash
+# 1. Bootstrap a new project from clips + music
+python3 scripts/bootstrap_project.py --clips ~/clips --music ~/music.mp3 --out ~/myproj
+
+# 2. Validate
+python3 scripts/validate_edit.py ~/myproj/my_project.py
+python3 scripts/audit_timings.py ~/myproj/my_project.py
+
+# 3. Preview (iterate until happy)
+QUALITY=preview python3 ~/myproj/my_project.py
+
+# 4. Validate cache before switching to 4K
+python3 scripts/validate_cache.py /tmp/myproj --quality final
+
+# 5. 4K master
+caffeinate -i -s python3 ~/myproj/my_project.py  # with QUALITY=final
 ```
 
-- Curve compresses 0-0.05 toward black (deep blacks preserved)
-- Lifts mids (0.20→0.27, 0.50→0.62)
-- Pushes highlights (0.80→0.88)
-- `colorbalance bs=-0.05` removes 5% blue from shadows = neutralizes cold cast
-
-Verify with `signalstats`:
-- `YMIN` should stay near 0 (deep blacks)
-- `% pixels < 10` should match neighbors (~2-5%)
-- `SATAVG` should be within ±2 of neighbors
-
-See `docs/exposure-recovery.md`.
-
-## Form-match cuts (perpendicular alignment)
-
-Cinematic cuts where adjacent shots share visual line orientation. Used to bridge between visually-similar top-down drone shots:
-
-1. Identify the dominant linear structure in each clip (rails, road, river, bridge)
-2. Find frames where each line is at a **specific orientation** (vertical, diagonal, etc.)
-3. Use `Hough line transform` or **visual inspection grids** to locate exact frames
-4. Set `src_start` to land the cut frame on that orientation
-
-For rotating drones (yaw):
-- Measure the angular velocity (°/sec) of each clip
-- Use ORB+RANSAC feature matching between consecutive frames → `cv2.estimateAffinePartial2D` → rotation angle
-- Choose playback speeds so **`source_yaw_rate × playback_speed`** matches across both clips
-- E.g. clip A natural 14°/s + clip B natural 24°/s → A at 1.25× and B at 0.74× both give 17.7°/s
-
-See `docs/match-cuts.md` for the scripts.
-
-## Music sync
-
-The track's emotional peaks dictate the structure. Identify them once via RMS analysis or by ear, then align ACT cuts to those timestamps:
-
-```python
-ACT_TRANSITIONS = [18.0, 37.0, 74.0, 110.0, 129.0]  # music peaks (s)
-```
-
-When tweaking durations, recompute cumulative cut times and verify each Act boundary lands within **±1.5s** of a peak. If off by more, adjust nearby plan durations.
-
-A `make_sting()` boom is mixed in at each ACT_TRANSITIONS time minus 0.8s (anticipation).
-
-See `docs/music-sync.md`.
-
-## SFX layering
-
-Per-clip SFX (in `make_sfx`) — synthetic-only via `lavfi`:
-
-- `ambient` — dual sine drone
-- `lapping` — pink noise + low-pass + slow tremolo (water)
-- `birds` — dual sine + tremolo/vibrato (chirps)
-- `cascade_fade` — white wash + low rumble + droplets, with mid-clip fade
-- `train` / `train_whistle` — low rumble + sine whistle
-- `whoosh` — bandpass pink noise burst
-- `boom` — 50Hz sine swell
-- `riser` — frequency-rising bass + high-noise pad (for accelerating clips)
-- `outro_ambient` — layered bass + footsteps + wind
-
-Global layers (in final mux):
-- `wind_global` — continuous subtle pink noise (volume ~0.65)
-- `match_whoosh` — single whoosh at form-cut points (volume ~0.55)
-- act stings (boom) at each `ACT_TRANSITIONS` minus 0.8s
-
-Balance reference (in final mix):
-- music = 0.85
-- per-clip SFX summed = 0.28
-- outro SFX = 0.55 (delayed to outro start)
-- stings = 0.55
-- wind global = 0.65 (its volume is internal in make_sfx, this is the mix gain)
-- match whoosh = 0.55
-
-See `docs/sfx-layers.md`.
-
-## Iteration loop
-
-The user will iterate many times. Follow this loop strictly:
-
-1. Apply ONE category of changes (e.g. color, or timing, or SFX — not all at once)
-2. `rm -rf <TMP_dir>` if structural changes (EDIT order, new clips, resolution)
-3. `QUALITY=preview python3 script.py` (5-8 min)
-4. Generate a storyboard grid (24 thumbnails, label changed plans in orange)
-5. Show storyboard + ask specific validation questions
-6. Iterate
-
-Don't make 5+ changes at once — user can't isolate what worked.
-
-## Performance — 4K render
-
-- 4K (3840×2160) with minterpolate fps=60: ~30-45 min for ~22 plans
-- 4K without minterpolate: ~15-20 min
-- On macOS M1 MBP unplugged: drain ~40% battery for full render
-- Use `caffeinate -i -s -w <PID>` to prevent sleep during render
-- If render is interrupted, the sub-clip cache resumes from last `clip_NN_J.mp4`
-
-## Common pitfalls
-
-| Symptom | Cause | Fix |
-|---|---|---|
-| Scintillement (flicker) | `noise=allf=t+u` (temporal flag) | Use `allf=u` only |
-| Saccadé (judder) on slowmo | 30fps source × 0.5x = 15fps effective | Add `minterpolate=fps=60` before setpts |
-| Grey/muddy blacks | `eq=brightness=+0.X` lifts black point | Use `curves` with anchor at 0/0 instead |
-| Color mismatch between clips | Single LUT applied uniformly | Per-clip `CLIP_GRADE` overrides |
-| Cuts feel "off" to music | Drift from added/removed seconds | Recompute cumulative times, target peaks ±1.5s |
-| Whites becoming grey on overlay | `eq=brightness` on outro | Use gamma + contrast (preserves whites) |
-| PNG title appears smaller after 4K | Hardcoded pixel sizes | Use `S(x) = int(x * SCALE)` where SCALE = OUT_W/3840 |
-
-## Reference files
-
-- **[PROCESS.md](PROCESS.md)** — Full A-to-Z workflow with music recommendations (READ THIS FIRST)
-- `examples/interlaken_v19.py` — Latest reference impl (cars SFX + audio mix balance)
-- `examples/interlaken_v16.py` — Earlier reference (exposure_fix introduced)
-- `templates/edit_template.py` — Bare-bones starter
-- `docs/` — Detailed guides per topic
-- `scripts/analyze_rotation.py` — Measure yaw rotation rate for match cuts
-- `scripts/analyze_sat.py` — Per-clip signalstats analysis
-- `scripts/find_perpendicular.py` — Find perpendicular line frames
-
-## When the user asks "comment je commence"
-
-Point them to **PROCESS.md** — it walks through music selection, EDIT structure, color grading, motion handling, SFX layers, iteration loop, and final 4K render in order. The skill's value is the **process**, not just the script.
+The whole journey from "user gives clips + music" to "4K master ready" should take **3-6 hours of wall time across 2-3 sessions** (most of which is render time you can do other things during). Without the bootstrap + validators, expect 2-3× that.
