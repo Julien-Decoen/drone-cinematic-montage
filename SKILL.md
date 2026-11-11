@@ -144,7 +144,8 @@ python3 scripts/multi_aspect_export.py master_lufs.mp4
 
 ### Phase 9 — Social distribution (optional)
 
-Thumbnails, story videos, share copy — captured in templates (TODO: thumbnails_template.py + story_reel_template.py).
+Thumbnails, story videos, share copy.
+→ See [docs/youtube-delivery.md](docs/youtube-delivery.md), [docs/instagram-vertical.md](docs/instagram-vertical.md) and the turn-key [docs/delivery-checklist.md](docs/delivery-checklist.md).
 
 ---
 
@@ -225,6 +226,8 @@ The template applies this automatically when `src_fps < 50 AND speed < 0.9`.
 
 **B. Real MP3 (recommended for V20+)** — Pixabay + ElevenLabs `.mp3` files in `_sfx_real/`. Calibrated dB targets in external `build_mix.py`. Better fidelity. Combine with `lcut_jcut.py` for polished audio bridges.
 
+→ For real MP3 pipeline, see [docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md) and [docs/audio-mixing.md](docs/audio-mixing.md).
+
 ---
 
 ## ⚠ Critical pitfalls (read these BEFORE the first render)
@@ -267,6 +270,11 @@ The skill has 16 documented bugs you WILL hit otherwise. Top 3:
 | **[docs/match-cuts.md](docs/match-cuts.md)** | Perpendicular alignment + yaw rotation matching |
 | **[docs/music-sync.md](docs/music-sync.md)** | ACT_TRANSITIONS strategy |
 | **[docs/sfx-layers.md](docs/sfx-layers.md)** | Synthetic SFX recipes + balance |
+| **[docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md)** | Real SFX via ElevenLabs API |
+| **[docs/audio-mixing.md](docs/audio-mixing.md)** | Iterative audio mixing methodology |
+| **[docs/youtube-delivery.md](docs/youtube-delivery.md)** | Thumbnail / banner / title / description |
+| **[docs/instagram-vertical.md](docs/instagram-vertical.md)** | Instagram 9:16 teaser |
+| **[docs/delivery-checklist.md](docs/delivery-checklist.md)** | Turn-key checklist to publish a new film |
 | **scripts/** | All utility scripts (see below) |
 | **[templates/render_template.py](templates/render_template.py)** | V25-grade ready-to-use template |
 | **[examples/interlaken_v19.py](examples/interlaken_v19.py)** | Real working script (archive, V19) |
