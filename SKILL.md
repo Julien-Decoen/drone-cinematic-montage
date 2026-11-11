@@ -105,7 +105,7 @@ Once master is done, user typically needs:
 - Instagram story / Reel cover (vertical 9:16, 10-15s teaser)
 - Share copy for Facebook / LinkedIn / Twitter / YouTube description
 
-→ See [docs/social-distribution.md](docs/social-distribution.md) (TODO) for templates.
+→ See [docs/youtube-delivery.md](docs/youtube-delivery.md), [docs/instagram-vertical.md](docs/instagram-vertical.md) and the turn-key [docs/delivery-checklist.md](docs/delivery-checklist.md).
 
 ---
 
@@ -185,7 +185,7 @@ The template applies this automatically when `src_fps < 50 AND speed < 0.9`.
 
 **B. Real MP3 (recommended for V20+)** — Pixabay + ElevenLabs `.mp3` files in `_sfx_real/`. Calibrated dB targets in external `build_mix.py`. Better fidelity.
 
-→ For real MP3 pipeline, see [docs/sfx-real-sourcing.md](docs/sfx-real-sourcing.md) (TODO).
+→ For real MP3 pipeline, see [docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md) and [docs/audio-mixing.md](docs/audio-mixing.md).
 
 ---
 
@@ -228,6 +228,11 @@ The skill has 16 documented bugs you WILL hit otherwise. Top 3:
 | **[docs/match-cuts.md](docs/match-cuts.md)** | Perpendicular alignment + yaw rotation matching |
 | **[docs/music-sync.md](docs/music-sync.md)** | ACT_TRANSITIONS strategy |
 | **[docs/sfx-layers.md](docs/sfx-layers.md)** | Synthetic SFX recipes + balance |
+| **[docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md)** | Real SFX via ElevenLabs API |
+| **[docs/audio-mixing.md](docs/audio-mixing.md)** | Iterative audio mixing methodology |
+| **[docs/youtube-delivery.md](docs/youtube-delivery.md)** | Thumbnail / banner / title / description |
+| **[docs/instagram-vertical.md](docs/instagram-vertical.md)** | Instagram 9:16 teaser |
+| **[docs/delivery-checklist.md](docs/delivery-checklist.md)** | Turn-key checklist to publish a new film |
 | **[scripts/bootstrap_project.py](scripts/bootstrap_project.py)** | 🚀 NEW: project starter in 1 command |
 | **[scripts/validate_edit.py](scripts/validate_edit.py)** | 🛡 NEW: source capacity validator |
 | **[scripts/validate_cache.py](scripts/validate_cache.py)** | 🛡 NEW: cache resolution validator |

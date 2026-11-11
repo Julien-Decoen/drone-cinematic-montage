@@ -1,6 +1,10 @@
 # PROCESS — End-to-end workflow
 
-> The complete A-to-Z process for building a cinematic drone montage, distilled from 19+ iterations on the Interlaken project.
+> The complete A-to-Z process for building a cinematic drone montage, distilled from **21 iterations** on the Interlaken project, including ElevenLabs SFX integration, audio mixing methodology, YouTube delivery and Instagram vertical export.
+
+**For a turn-key checklist** (do this on every project): see [docs/delivery-checklist.md](docs/delivery-checklist.md).
+
+---
 
 ## Phase 0 — Discovery & assets
 
@@ -249,6 +253,17 @@ See [match-cuts.md](docs/match-cuts.md).
 
 ## Phase 5 — Sound design (SFX layers)
 
+For pro-quality results: use **real ElevenLabs SFX** (see [docs/sfx-real-elevenlabs.md](docs/sfx-real-elevenlabs.md)). Costs ~$0.10 / project, dramatically more cinematic than synthetic.
+
+Workflow:
+1. Identify which plans need which SFX (category mapping)
+2. Generate real SFX via ElevenLabs API (15 prompts × ~10s = ~$0.10)
+3. Measure loudness of each
+4. Build initial mix with category-based gains
+5. **Iterate audio mix** — propose 2-3 variants per round (see [docs/audio-mixing.md](docs/audio-mixing.md))
+6. Validate with storyboard-with-sound video (1 frame/plan + audio), not full 4K re-render
+
+
 ### 5.1 SFX selection by visual context
 
 For each plan, pick an SFX matching the **scene type** AND **camera distance**:
@@ -433,6 +448,42 @@ ffprobe -v error -show_entries format=duration,size,bit_rate \
 ```
 
 Expected: 3840×2160 · 30/1 fps · h264 · 40-50 Mbps · ~1 GB · target duration ±0.1s.
+
+---
+
+## Phase 9 — Delivery (YouTube + Instagram)
+
+After 4K master is locked, produce the publishing kit:
+
+### 9.1 YouTube package
+
+See [docs/youtube-delivery.md](docs/youtube-delivery.md) for full details.
+
+- **Thumbnail** 1920×1080 JPG — 4 candidates → user picks. Didot italic title + Helvetica subtitle on bottom-darkened hero frame.
+- **Title** — Location-first, ≤60 chars, English: `[LOCATION] — [Storytelling] | [Quality]`
+- **Description** — Hook + locations + gear + music credit (with URL) + chapters + IG link + tags
+- **Channel banner** 2560×1440 JPG — letterbox cinema, **tagline only** (no channel name — YouTube displays it), text in 1235×338 safe area
+- **Channel description** — Tagline first, then 2-3 sentences + gear + social
+- **Tags** — 10-15 specific (location + gear + style)
+
+### 9.2 Instagram vertical teasers
+
+See [docs/instagram-vertical.md](docs/instagram-vertical.md).
+
+- **Full vertical** (entire film 9:16 cropped, same duration as master)
+- **Reels 60s** (most cinematic minute, typically t=70-130s)
+- **Square 1:1 60s** (optional, IG feed grid)
+
+All generated via ffmpeg from the same 4K master — no re-render required.
+
+### 9.3 Archive
+
+Copy to `<project>/_resources/`:
+- All `v*.py` scripts (full version history)
+- SFX library used
+- Storyboard PNGs
+- Thumbnail / banner candidates
+- Final mix MP3
 
 ---
 
